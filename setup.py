@@ -1,41 +1,49 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import os
+import codecs
 from setuptools import setup
 
-"""
-author: fungaegis
-github: https://github.com/fungaegis/pytest-failed-screenshot
-"""
-with open("./README.rst", "r") as readme:
-    long_description = readme.read()
-setup(
-    name='pytest_failed_screenshot',
-    url='https://github.com/fungaegis/pytest-failed-screenshot',
-    version='1.0.2',
-    author="fungaegis",
-    author_email="fungaegis@gmail.com",
-    description='Test case fails,take a screenshot,save it,attach it to the allure',
-    long_description=long_description,
-    classifiers=[
-        'Framework :: Pytest',
-        'Programming Language :: Python :: 3',
-        'Topic :: Software Development :: Testing',
-        'Programming Language :: Python :: 3.7',
-    ],
-    license='MIT License',
-    py_modules=['pytest_failed_screenshot'],
-    keywords=[
-        'pytest', 'py.test', 'pytest_failed_screenshot', 'allure', 'screenshot', 'selenium', 'appium'
-    ],
 
-    install_requires=[
-        'pytest',
-        'selenium',
-        'allure-pytest',
-        'allure-python-commons',
-        'helium'
+def read(fname):
+    file_path = os.path.join(os.path.dirname(__file__), fname)
+    return codecs.open(file_path, encoding='utf-8').read()
+
+
+setup(
+    name='pytest-failed-screen-record',
+    version='0.1.0',
+    author='Keisuke Shima',
+    author_email='19993104+KeisukeShima@users.noreply.github.com',
+    maintainer='Keisuke Shima',
+    maintainer_email='19993104+KeisukeShima@users.noreply.github.com',
+    license='MIT',
+    url='https://github.com/KeisukeShima/pytest-failed-screen-record',
+    description='Create a video of the screen when pytest fails',
+    long_description=read('README.rst'),
+    py_modules=['pytest_failed_screen_record'],
+    python_requires='>=3.8',
+    install_requires=['pytest>=7.1.2'],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Framework :: Pytest',
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Testing',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Operating System :: OS Independent',
+        'License :: OSI Approved :: MIT License',
     ],
     entry_points={
         'pytest11': [
-            'failed_screenshot = pytest_failed_screenshot',
-        ]
-    }
+            'failed_screen_record = pytest_failed_screen_record',
+        ],
+    },
 )

@@ -1,82 +1,76 @@
-pytest-failed-screenshot: pytest plugin
-=======================================
+===========================
+pytest-failed-screen-record
+===========================
 
-For UI automation test cases using selenium and appium, screenshots are
-saved when they fail, and are attached to the report when allure is used
+.. image:: https://img.shields.io/pypi/v/pytest-failed-screen-record.svg
+    :target: https://pypi.org/project/pytest-failed-screen-record
+    :alt: PyPI version
 
-Support helium, the webdriver process cannot be killed within a use case
+.. image:: https://img.shields.io/pypi/pyversions/pytest-failed-screen-record.svg
+    :target: https://pypi.org/project/pytest-failed-screen-record
+    :alt: Python versions
 
-install
-=======
+.. image:: https://ci.appveyor.com/api/projects/status/github/KeisukeShima/pytest-failed-screen-record?branch=master
+    :target: https://ci.appveyor.com/project/KeisukeShima/pytest-failed-screen-record/branch/master
+    :alt: See Build Status on AppVeyor
 
-``pip install pytest-failed-screenshot``
+Create a video of the screen when pytest fails
+
+----
+
+This `pytest`_ plugin was generated with `Cookiecutter`_ along with `@hackebrot`_'s `cookiecutter-pytest-plugin`_ template.
+
+
+Features
+--------
+
+* TODO
+
+
+Requirements
+------------
+
+* TODO
+
+
+Installation
+------------
+
+You can install "pytest-failed-screen-record" via `pip`_ from `PyPI`_::
+
+    $ pip install pytest-failed-screen-record
+
 
 Usage
-=====
+-----
 
-command line:``pytest --screenshot={on:off} --screenshot_path={on:off:absolute path}``
+* TODO
 
+Contributing
+------------
+Contributions are very welcome. Tests can be run with `tox`_, please ensure
+the coverage at least stays the same before you submit a pull request.
 
-* - options:
-  - screenshot: Used to open plugin, default "off"
-  - screenshot_path:
-     - off: The default is 'off'.The screenshot will not be saved and will only be attached to the allure report.
-     - on: The screenshots will be saved to the "./screenshot/%Y-%m-%d/" directory in the root path of the project.
-       If the directory has historical screenshots, the historical screenshots will be archived, moved to the
-       "./screenshot/history/%Y-%m-%d/{times}" directory, and attached to the allure report
-     - Absolute path: The screenshot will be saved in that path and attached to the report.
+License
+-------
 
-
-Demo
-====
-
-The driver instances of selenium and appium must be transferred by a
-fixture.
-
-.. code-block:: python
-
-    import pytest
-    from selenium import webdriver
+Distributed under the terms of the `MIT`_ license, "pytest-failed-screen-record" is free and open source software
 
 
-    @pytest.fixture()
-    def init_driver():
-        driver = webdriver.Chrome()
-        yield driver
-        driver.close()
-        driver.quit()
+Issues
+------
 
+If you encounter any problems, please `file an issue`_ along with a detailed description.
 
-    def test_login_success(init_driver):
-        init_driver.get("https://github.com/fungaegis/pytest-failed-screenshot")
-        assert False
-
-
-    # helium demo
-    @pytest.fixture()
-    def init_helium():
-        yield None
-        kill_browser()
-
-
-    @pytest.mark.usefixtures("init_helium")
-    def test_helium_demo():
-        start_chrome("https://github.com/fungaegis/pytest-failed-screenshot")
-        # The webdriver process cannot be killed within a use case
-        assert False
-
-
-command: ``pytest --screenshot=on --screenshot_path=on``
-
-tip: Support the use of pytest-xdist together
-
-log
-===
-v1.0.1
-
-Support helium for screenshots , solve the problem https://github.com/fungaegis/pytest-failed-screenshot/issues/1
-
-v1.0.2
-
-Update the readme and add demo
-
+.. _`Cookiecutter`: https://github.com/audreyr/cookiecutter
+.. _`@hackebrot`: https://github.com/hackebrot
+.. _`MIT`: http://opensource.org/licenses/MIT
+.. _`BSD-3`: http://opensource.org/licenses/BSD-3-Clause
+.. _`GNU GPL v3.0`: http://www.gnu.org/licenses/gpl-3.0.txt
+.. _`Apache Software License 2.0`: http://www.apache.org/licenses/LICENSE-2.0
+.. _`cookiecutter-pytest-plugin`: https://github.com/pytest-dev/cookiecutter-pytest-plugin
+.. _`file an issue`: https://github.com/KeisukeShima/pytest-failed-screen-record/issues
+.. _`pytest`: https://github.com/pytest-dev/pytest
+.. _`tox`: https://tox.readthedocs.io/en/latest/
+.. _`pip`: https://pypi.org/project/pip/
+.. _`PyPI`: https://pypi.org/project

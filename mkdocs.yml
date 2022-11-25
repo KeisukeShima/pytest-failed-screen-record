@@ -1,0 +1,10 @@
+site_name: pytest-failed-screen-record
+site_description: Create a video of the screen when pytest fails
+site_author: Keisuke Shima
+
+theme: readthedocs
+
+repo_url: https://github.com/KeisukeShima/pytest-failed-screen-record
+
+pages:
+- Home: index.md
