@@ -1,4 +1,3 @@
-import os
 import time
 import uuid
 import pytest
@@ -21,6 +20,11 @@ def pytest_addoption(parser):
                     help="It will be save in the 'record' directory of current directory. "
                         "If this parameter is set, it will be save in the specified path.")
 
+    group.addoption("--record-fps",
+                    default=1.0,
+                    type=float,
+                    help="Specifies the frame rate of the recording. Default is 1.0. Limitations depend on the processing power of the computer.")
+
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_load_initial_conftests(early_config, parser, args):
@@ -30,10 +34,9 @@ def pytest_load_initial_conftests(early_config, parser, args):
 
 
 class RecordPlugin:
-    FPS = 10.0
-
     def __init__(self, options, pluginmanager):
         self.options = options
+        self.fps = options.record_fps
 
 
     def pytest_configure(self, config):
@@ -63,7 +66,7 @@ class RecordPlugin:
         writer = cv2.VideoWriter(
             str(save_dir / ('capture' + str(uuid.uuid4()).replace("-", "")[:8] + '.mp4')),
             fourcc,
-            self.FPS,
+            self.fps,
             (self.img_width, self.img_height),
         )
         # キャプチャー画像を読み出して出力動画ファイルに追記
@@ -87,6 +90,7 @@ class RecordPlugin:
             kwargs={
                 "capture_list": self.capture_list,
                 "stop_flag": self.stop_flag,
+                "fps": self.fps,
             }
         )
         self.process.start()
@@ -97,11 +101,16 @@ class RecordPlugin:
         self.process.join()
 
 
-def capture_func(capture_list, stop_flag):
+def capture_func(capture_list, stop_flag, fps):
+    interval = 1.0 / fps
     while True:
+        loop_start_time = time.time()
         if stop_flag.is_set():
             break
         capture = pyautogui.screenshot()
         image = cv2.cvtColor(np.asarray(capture), cv2.COLOR_RGB2BGR)
         capture_list.append(image)
-        time.sleep(1.0 / RecordPlugin.FPS)
+
+        time_diff = time.time() - loop_start_time
+        if time_diff < interval:
+            time.sleep(interval - time_diff)

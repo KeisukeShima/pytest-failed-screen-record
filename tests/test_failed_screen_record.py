@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
 
 
 def test_help_message(testdir):
@@ -25,7 +26,7 @@ def test_record_on_failure(testdir):
             assert True
 
         def test_hello_world2():
-            time.sleep(10)
+            time.sleep(1)
             assert False
 
         def test_hello_world3():
@@ -43,5 +44,5 @@ def test_record_on_failure(testdir):
     ])
 
     # make sure that that we get a '0' exit code for the testsuite
-    # assert result.ret == 0
-    assert True
+    result_dir = Path(testdir.tmpdir) / "record"
+    assert sum(1 for _ in result_dir.glob("*.mp4")) == 2
