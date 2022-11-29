@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pytest-failed-screen-record"
+version = "0.1.0"
+description = ""
+authors = ["Keisuke Shima <19993104+KeisukeShima@users.noreply.github.com>"]
+
+[tool.poetry.plugins.pytest11]
+failed_screen_record = "pytest_failed_screen_record"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^1.23.5"
+pytest = "^7.2.0"
+PyAutoGUI = "^0.9.53"
+opencv-python = "^4.6.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

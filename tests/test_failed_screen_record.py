@@ -19,11 +19,13 @@ def test_help_message(testdir):
 def test_record_on_failure(testdir):
     testdir.makepyfile("""
         import pytest
+        import time
 
         def test_hello_world():
             assert True
 
         def test_hello_world2():
+            time.sleep(10)
             assert False
 
         def test_hello_world3():
@@ -35,7 +37,9 @@ def test_record_on_failure(testdir):
 
     # fnmatch_lines does an assertion internally
     result.stdout.fnmatch_lines([
-        '*::test_hello_world PASSED*',
+        # '*::test_hello_world PASSED*',
+        "FAILED*::test_hello_world2*",
+        "FAILED*::test_hello_world3*",
     ])
 
     # make sure that that we get a '0' exit code for the testsuite

@@ -3,6 +3,10 @@ import time
 import uuid
 import pytest
 from pathlib import Path
+import pyautogui
+import cv2
+import numpy as np
+from multiprocessing import Manager, Process, Event
 
 
 def pytest_addoption(parser):
@@ -18,79 +22,86 @@ def pytest_addoption(parser):
                         "If this parameter is set, it will be save in the specified path.")
 
 
-def pytest_configure(config):
-    record_path = config.getvalue("record_path")
-    switch = config.getvalue("record")
-    if switch:
-        record_path.mkdir(exist_ok=True, parents=True)
-        # archive_file(record)
+@pytest.hookimpl(tryfirst=True)
+def pytest_load_initial_conftests(early_config, parser, args):
+    options = early_config.known_args_namespace
+    plugin = RecordPlugin(options, early_config.pluginmanager)
+    early_config.pluginmanager.register(plugin, '_record')
 
 
-record_path_with_stamp = ""
-@pytest.hookimpl(hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    print("debug1")
-    outcome = yield
-    result = outcome.get_result()
-    print("debug2: " + result.when)
-    if item.config.getvalue("record"):
-        global record_path_with_stamp
-        if result.when == "setup":
-            record_path = item.config.getvalue("record_path")
-            record_path_with_stamp = record_path / time.strftime("%Y-%m-%d")
-            record_path_with_stamp.mkdir(exist_ok=True)
-            start_capture(record_path_with_stamp, item.name)
-        elif result.when == "call" and result.failed:
-            stop_capture()
-            save_capture(record_path_with_stamp, item.name)
-        elif result.when == "call" and result.passed:
-            stop_capture()
+class RecordPlugin:
+    FPS = 10.0
+
+    def __init__(self, options, pluginmanager):
+        self.options = options
 
 
-def save_capture(filedir, page_name):
-    try:
-        img_path = os.path.join(filedir, page_name + "_" + str(uuid.uuid4()).replace("-", "")[:8] + ".png")
-        print(f"saved screenshot: {img_path}")
-        return img_path
-    except (OSError, NameError) as e:
-        print(e)
+    def pytest_configure(self, config):
+        record_path = config.getvalue("record_path")
+        switch = config.getvalue("record")
+        if switch:
+            record_path.mkdir(exist_ok=True, parents=True)
 
 
-def start_capture(filedir, page_name):
-    img_path = os.path.join(filedir, page_name + "_" + str(uuid.uuid4()).replace("-", "")[:8] + ".png")
-    print(f"start capture: {img_path}")
+    @pytest.hookimpl(hookwrapper=True)
+    def pytest_runtest_makereport(self, item, call):
+        outcome = yield
+        result = outcome.get_result()
+        record_path = item.config.getvalue("record_path")
+        if item.config.getvalue("record"):
+            if result.when == "setup":
+                self.start_capture()
+            elif result.when == "call" and result.failed:
+                self.stop_capture()
+                self.save_capture(record_path)
+            elif result.when == "call" and result.passed:
+                self.stop_capture()
 
 
-def stop_capture():
-    print(f"stop capture")
+    def save_capture(self, save_dir):
+        fourcc = cv2.VideoWriter_fourcc(*"MP4V")
+        writer = cv2.VideoWriter(
+            str(save_dir / ('capture' + str(uuid.uuid4()).replace("-", "")[:8] + '.mp4')),
+            fourcc,
+            self.FPS,
+            (self.img_width, self.img_height),
+        )
+        # キャプチャー画像を読み出して出力動画ファイルに追記
+        for img in self.capture_list:
+            writer.write(img)
+        writer.release()
 
 
-# def archive_file(filepath, pattern=r"[\w\]\[]*\.png") -> None:
-#     if not os.path.exists(filepath):
-#         os.makedirs(filepath)
-#     else:
-#         dirs_list = os.listdir(filepath)
-#         for dir_name in dirs_list:
-#             path = os.path.join(filepath, dir_name)
-#             if not os.path.isdir(path):
-#                 continue
-#             dirs = ';'.join(os.listdir(path))
-#             mv_dirs = re.findall(pattern, dirs)
-#             if mv_dirs:
-#                 history = os.path.join(filepath, "history", dir_name)
-#                 if not os.path.exists(history):
-#                     os.makedirs(history)
-#                 times = 1
-#                 while True:
-#                     existing = os.path.join(history, str(times))
-#                     if not os.path.exists(existing):
-#                         os.makedirs(existing)
-#                         break
-#                     times += 1
-#                 for i in mv_dirs:
-#                     shutil.move(os.path.join(path, i), existing)
-#                 else:
-#                     try:
-#                         os.removedirs(path)
-#                     except OSError as e:
-#                         print(f"Delete directory path:{path} error! Track:{e}")
+    def start_capture(self):
+        # ウィンドウサイズを取得するため、一度Captureする
+        capture = pyautogui.screenshot()
+        image_array = np.asarray(capture)
+        self.img_height, self.img_width, self.channels = image_array.shape
+
+        # Start Process
+        self.manager = Manager()
+        self.capture_list = self.manager.list()
+        self.stop_flag = Event()
+        self.process = Process(
+            target=capture_func,
+            kwargs={
+                "capture_list": self.capture_list,
+                "stop_flag": self.stop_flag,
+            }
+        )
+        self.process.start()
+
+
+    def stop_capture(self):
+        self.stop_flag.set()
+        self.process.join()
+
+
+def capture_func(capture_list, stop_flag):
+    while True:
+        if stop_flag.is_set():
+            break
+        capture = pyautogui.screenshot()
+        image = cv2.cvtColor(np.asarray(capture), cv2.COLOR_RGB2BGR)
+        capture_list.append(image)
+        time.sleep(1.0 / RecordPlugin.FPS)
