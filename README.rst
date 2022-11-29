@@ -30,7 +30,9 @@ Features
 Requirements
 ------------
 
-* TODO
+You need to install "scrot" via apt.
+
+    $ sudo apt-get install scrot
 
 
 Installation

@@ -1,16 +1,36 @@
 [tool.poetry]
 name = "pytest-failed-screen-record"
-version = "0.1.0"
-description = ""
+version = "0.1.1"
+description = "Create a video of the screen when pytest fails"
 authors = ["Keisuke Shima <19993104+KeisukeShima@users.noreply.github.com>"]
+readme = "README.rst"
+repository = "https://github.com/KeisukeShima/pytest-failed-screen-record"
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Framework :: Pytest',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development :: Testing',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: Implementation :: CPython',
+    'Programming Language :: Python :: Implementation :: PyPy',
+    'Operating System :: OS Independent',
+    'License :: OSI Approved :: MIT License',
+]
+license='MIT'
+
 
 [tool.poetry.plugins.pytest11]
 failed_screen_record = "pytest_failed_screen_record"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8"
 numpy = "^1.23.5"
-pytest = "^7.2.0"
+pytest = "^7.1.2d"
 PyAutoGUI = "^0.9.53"
 opencv-python = "^4.6.0"
 
