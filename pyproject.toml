@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest-failed-screen-record"
-version = "0.1.1"
+version = "0.1.2"
 description = "Create a video of the screen when pytest fails"
 authors = ["Keisuke Shima <19993104+KeisukeShima@users.noreply.github.com>"]
 readme = "README.rst"
@@ -33,6 +33,7 @@ numpy = "^1.23.5"
 pytest = "^7.1.2d"
 PyAutoGUI = "^0.9.53"
 opencv-python = "^4.6.0"
+DateTime = "^4.9"
 
 [tool.poetry.dev-dependencies]
 

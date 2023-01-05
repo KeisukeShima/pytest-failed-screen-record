@@ -1,3 +1,6 @@
+import os
+import re
+import socket
 import time
 import uuid
 import pytest
@@ -6,6 +9,7 @@ import pyautogui
 import cv2
 import numpy as np
 from multiprocessing import Manager, Process, Event
+from datetime import datetime
 
 
 def pytest_addoption(parser):
@@ -39,11 +43,24 @@ class RecordPlugin:
         self.fps = options.record_fps
 
 
-    def pytest_configure(self, config):
-        record_path = config.getvalue("record_path")
-        switch = config.getvalue("record")
-        if switch:
-            record_path.mkdir(exist_ok=True, parents=True)
+    def _get_testsuite_name(self):
+        test_env_name = os.getenv('PYTEST_CURRENT_TEST')
+        if test_env_name:
+            test_case_name =  re.search(r"::(.*)\[", test_env_name).group(1)
+            return test_case_name
+        else:
+            return "capture" + "-" + str(uuid.uuid4()).replace("-", "")[:8]
+
+
+    def _create_save_dir(self, record_path):
+        datetime_str = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
+        log_dirname = '{0}-{1}-{2}'.format(
+            datetime_str, socket.gethostname(), os.getpid()
+        )
+        testsuite_dirname = self._get_testsuite_name()
+        log_dir = record_path / log_dirname / testsuite_dirname
+        log_dir.mkdir(exist_ok=True, parents=True)
+        return log_dir
 
 
     @pytest.hookimpl(hookwrapper=True)
@@ -53,18 +70,19 @@ class RecordPlugin:
         record_path = item.config.getvalue("record_path")
         if item.config.getvalue("record"):
             if result.when == "setup":
+                self.save_dir = self._create_save_dir(record_path)
                 self.start_capture()
             elif result.when == "call" and result.failed:
                 self.stop_capture()
-                self.save_capture(record_path)
+                self.save_capture(self.save_dir)
             elif result.when == "call" and result.passed:
                 self.stop_capture()
 
 
     def save_capture(self, save_dir):
-        fourcc = cv2.VideoWriter_fourcc(*"MP4V")
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         writer = cv2.VideoWriter(
-            str(save_dir / ('capture' + str(uuid.uuid4()).replace("-", "")[:8] + '.mp4')),
+            str(save_dir / 'capture.mp4'),
             fourcc,
             self.fps,
             (self.img_width, self.img_height),
